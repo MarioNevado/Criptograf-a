@@ -9,6 +9,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.security.*;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.*;
@@ -25,7 +26,7 @@ import javax.crypto.*;
  */
 public class GenerarClave implements Serializable {
 
-    private SecretKey clave;
+    private static SecretKey clave;
 
     public Key getClave() {
         return clave;
@@ -38,36 +39,33 @@ public class GenerarClave implements Serializable {
     public GenerarClave() {
     }
 
-    public static void main(String[] args) throws FileNotFoundException, IOException, ClassNotFoundException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+    public static void main(String[] args) throws Exception {
+        System.out.println("1");
         ObjectOutputStream claveObj = null;
-        File fichero = null;
-        GenerarClave key = null;
+        File fichero;
+        GenerarClave key;
         KeyGenerator keyGen;
-
         try {
             key = new GenerarClave();
-
             keyGen = KeyGenerator.getInstance("AES");
             keyGen.init(128);
             key.setClave(keyGen.generateKey());
             fichero = new File("miClave.key");
             claveObj = new ObjectOutputStream(new FileOutputStream(fichero));
             claveObj.writeObject(key);
-            System.out.println("Clave generada de tipo:" + key.getClave().getAlgorithm());
-            System.out.println("Clave format:" + key.getClave().getFormat());
-            System.out.println("Clave Encoded:" + key.getClave().getEncoded());
+            System.out.println("Clave generada de tipo:" + clave.getAlgorithm());
+            System.out.println("Clave format:" + clave.getFormat());
+            System.out.println("Clave Encoded:" + Arrays.toString(clave.getEncoded()));
 
-        } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(GenerarClave.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(GenerarClave.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            ex.printStackTrace();
         } finally {
             try {
                 if (claveObj != null) {
                     claveObj.close();
                 }
             } catch (IOException ex) {
-                Logger.getLogger(GenerarClave.class.getName()).log(Level.SEVERE, null, ex);
+                ex.printStackTrace();
             }
         }
 

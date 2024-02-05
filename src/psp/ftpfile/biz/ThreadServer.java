@@ -21,9 +21,11 @@ public class ThreadServer extends Thread {
 
     Socket costumer;
     String path;
+    GenerarClave keygen;
 
-    public ThreadServer(Socket costumer) {
+    public ThreadServer(Socket costumer, GenerarClave keygen) {
         this.costumer = costumer;
+        this.keygen = keygen;
     }
 
     @Override
@@ -36,34 +38,22 @@ public class ThreadServer extends Thread {
         GenerarClave keyObj;
 
         try {
-            ObjectInputStream claveStream = new ObjectInputStream(new FileInputStream("miClave.key"));
-            keyObj = (GenerarClave) claveStream.readObject();
-
             do {
                 ois = new ObjectInputStream(costumer.getInputStream());
                 path = (String) ois.readObject();
                 if (!path.equals("exit")) {
+                    ObjectInputStream claveStream = new ObjectInputStream(new FileInputStream("miClave.key"));
+                    keyObj = (GenerarClave) claveStream.readObject();
                     aux = new File(path);
                     if (aux.exists()) {
                         if (aux.isFile()) {
                             if (aux.canRead()) {
-                                try {
-
-                                    Cipher c = Cipher.getInstance("AES/ECB/PKCS5Padding");
-                                    c.init(Cipher.ENCRYPT_MODE, keyObj.getClave());
-                                    array = Utils.getBytes(aux);
-                                    byte[] fichBytesCifrados = c.doFinal(array);
-
-                                    byte[] hashOriginal = Utils.getHash("SHA-512", array);
-
-
-                                    file = new SendFile(0, fichBytesCifrados, hashOriginal);
-                                    oos = new ObjectOutputStream(costumer.getOutputStream());
-                                    oos.writeObject(file);
-
-                                } catch (FileNotFoundException fnf) {
-                                    file = new SendFile(4, null);
-                                }
+                                Cipher c = Cipher.getInstance("AES/ECB/PKCS5Padding");
+                                c.init(Cipher.ENCRYPT_MODE, keyObj.getClave());
+                                array = Utils.fileToByteArray(aux.getAbsolutePath());
+                                byte[] fichBytesCifrados = c.doFinal(array);
+                                byte[] hashOriginal = Utils.getHash("SHA-512", array);
+                                file = new SendFile(0, fichBytesCifrados, hashOriginal);
                             } else {
                                 file = new SendFile(3, null);
                             }

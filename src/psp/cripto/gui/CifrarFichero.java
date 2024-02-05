@@ -26,24 +26,21 @@ import javax.crypto.NoSuchPaddingException;
 public class CifrarFichero {
 
     public static void main(String[] args) {
-
         File ficheroCifrar;
         File keyFichero = new File("miClave.key");
         GenerarClave keyObj;
-
-        FileOutputStream ficheroOut;
-
         ObjectInputStream clave;
         byte[] fichBytes = null;
         byte[] fichBytesCifrados = null;
         if (args.length > 0) {
             try {
                 ficheroCifrar = new File(args[0]);
-                clave = new ObjectInputStream(new FileInputStream(keyFichero));
+                clave = new ObjectInputStream(new FileInputStream(keyFichero)); //es nulo
                 keyObj = (GenerarClave) clave.readObject();
 
                 // Cifrando byte[] con Cipher.
                 Cipher c = Cipher.getInstance("AES/ECB/PKCS5Padding");
+                System.out.println();
                 c.init(Cipher.ENCRYPT_MODE, keyObj.getClave());
                 fichBytes = ficheroBytes(ficheroCifrar);
                 fichBytesCifrados = c.doFinal(fichBytes);
@@ -51,11 +48,11 @@ public class CifrarFichero {
                 System.out.println("Encriptado el fichero...:" + ficheroCifrar.getName());
 
             } catch (IOException ex) {
-                System.out.println("Error I/O");
+                System.out.println(ex.getCause());
             } catch (ClassNotFoundException ex) {
                 System.out.println(ex.getMessage());
             } catch (InvalidKeyException ex) {
-                System.out.println("Clave no valida");
+                ex.printStackTrace();
             } catch (IllegalBlockSizeException ex) {
                 System.out.println(ex.getMessage());
             } catch (BadPaddingException ex) {
@@ -65,9 +62,8 @@ public class CifrarFichero {
             } catch (NoSuchPaddingException ex) {
                 System.out.println(ex.getMessage());
             } catch (java.lang.IllegalArgumentException ex) {
-
+                System.out.println(ex.getMessage());
             }
-
         } else {
             System.out.println("No se ha especificado archivo a cifrar.");
         }
@@ -96,7 +92,6 @@ public class CifrarFichero {
     }
 
     public static void grabarFicheroCifrado(File fichero, byte[] ficheroBytes) {
-
         File ficheroCifrado;
         BufferedOutputStream fichSalida = null;
         try {

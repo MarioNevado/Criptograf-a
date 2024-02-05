@@ -29,8 +29,8 @@ public class Exec {
             do {
                 System.out.print("Introducir ruta absoluta del fichero (exit para salir): ");
                 path = sc.nextLine();
-                //fileName = path.split("/")[path.split("/").length - 1];
-                fileName = path.split("\\\\")[path.split("\\\\").length - 1];
+                fileName = path.split("/")[path.split("/").length - 1];
+                //fileName = path.split("\\\\")[path.split("\\\\").length - 1];
 
                 oos = new ObjectOutputStream(costumer.getOutputStream());
                 oos.writeObject(path);
@@ -38,18 +38,13 @@ public class Exec {
                     ois = new ObjectInputStream(costumer.getInputStream());
                     file = (SendFile) ois.readObject();
                     if (file.getCode() == 0) {
-                        //route = "/home/dev/NetBeansProjects/FileTCP/" + fileName;
-                        route = "C:\\pruebaCripto\\" + fileName;
+                        route = "/home/dev/NetBeansProjects/FileTCP/" + fileName;
+                        //route = "C:\\pruebaCripto\\" + fileName;
                         GenerarClave keyObj;
                         ois = new ObjectInputStream(new FileInputStream("miclave.key"));
                         keyObj = (GenerarClave) ois.readObject();
                         Cipher c = Cipher.getInstance("AES/ECB/PKCS5Padding");
                         c.init(Cipher.DECRYPT_MODE, keyObj.getClave());
-                        byte[] fichBytesDescifrados = c.doFinal(file.getContent());
-
-                        byte[] hashDescifrado = Utils.getHash("SHA-512", fichBytesDescifrados);
-
-                       // Utils.byteArrayToFile(route, file.getContent());
                         byte[] hash = Utils.getHash("SHA-512", file.getContent());
                         if (Arrays.equals(hash, file.getContent())) {
                             Utils.byteArrayToFile(route, file.getContent());

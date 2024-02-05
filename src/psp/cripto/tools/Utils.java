@@ -47,36 +47,6 @@ public class Utils {
         }
         return null;
     }
-
-    public static byte[] getBytes(File fichero) {
-        FileInputStream fis = null;
-        byte[] buff = null;
-        try {
-            fis = new FileInputStream(fichero);
-            long bytes = fichero.length();
-            buff = new byte[(int) bytes];
-            int i, j = 0;
-            while ((i = fis.read()) != -1) {
-                buff[j] = (byte) i;
-                j++;
-            }
-        } catch (FileNotFoundException ex) {
-            System.err.println("El fichero no existe");
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        } finally {
-            try {
-                if (fis != null) {
-                    fis.close();
-                }
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        }
-
-        return buff;
-    }
-
     public static String hex(byte[] resumen) {
         String hex = "";
         for (int i = 0; i < resumen.length; i++) {
@@ -88,4 +58,24 @@ public class Utils {
         }
         return hex;
     }
+    
+    public static void cifrarClaveSimetrica(){
+        
+    }
+    public static void descifrarClaveSimetrica(){
+        
+    }
+    public static void cifrarClavePublica(){
+        
+    }
+    public static void descifrarClavePublica(){
+        
+    }
+    public static void cifrarClavePrivada(){
+        
+    }
+    public static void descifrarClavePrivada(){
+        
+    }
+    
 }
