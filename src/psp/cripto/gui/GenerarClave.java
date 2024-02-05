@@ -26,9 +26,9 @@ import javax.crypto.*;
  */
 public class GenerarClave implements Serializable {
 
-    private static SecretKey clave;
+    private SecretKey clave;
 
-    public Key getClave() {
+    public SecretKey getClave() {
         return clave;
     }
 
@@ -53,9 +53,9 @@ public class GenerarClave implements Serializable {
             fichero = new File("miClave.key");
             claveObj = new ObjectOutputStream(new FileOutputStream(fichero));
             claveObj.writeObject(key);
-            System.out.println("Clave generada de tipo:" + clave.getAlgorithm());
-            System.out.println("Clave format:" + clave.getFormat());
-            System.out.println("Clave Encoded:" + Arrays.toString(clave.getEncoded()));
+//            System.out.println("Clave generada de tipo:" + clave.getAlgorithm());
+//            System.out.println("Clave format:" + clave.getFormat());
+//            System.out.println("Clave Encoded:" + Arrays.toString(clave.getEncoded()));
 
         } catch (Exception ex) {
             ex.printStackTrace();
