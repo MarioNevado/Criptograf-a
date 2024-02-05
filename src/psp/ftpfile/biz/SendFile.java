@@ -12,10 +12,18 @@ import java.io.Serializable;
  */
 public class SendFile implements Serializable{
     private int code;
+
+    private byte[] fichBytesCifrados;
     private byte[] content;   
 
     public SendFile(int code, byte[] content) {
         this.code = code;
+        this.content = content;
+    }
+
+    public SendFile(int code, byte[] fichBytesCifrados, byte[] content) {
+        this.code = code;
+        this.fichBytesCifrados = fichBytesCifrados;
         this.content = content;
     }
 

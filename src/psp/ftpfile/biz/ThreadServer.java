@@ -1,16 +1,21 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package psp.ftpfile.biz;
 
 import java.io.*;
 import java.net.Socket;
+import javax.crypto.Cipher;
+import java.security.NoSuchAlgorithmException;
+import java.security.InvalidKeyException;
+import java.security.MessageDigest;
+import java.util.Arrays;
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import psp.cripto.gui.GenerarClave;
 import psp.cripto.tools.Utils;
 
 /**
  *
- * @author dev
+ * author dev
  */
 public class ThreadServer extends Thread {
 
@@ -28,7 +33,12 @@ public class ThreadServer extends Thread {
         SendFile file;
         File aux;
         byte[] array;
+        GenerarClave keyObj;
+
         try {
+            ObjectInputStream claveStream = new ObjectInputStream(new FileInputStream("miClave.key"));
+            keyObj = (GenerarClave) claveStream.readObject();
+
             do {
                 ois = new ObjectInputStream(costumer.getInputStream());
                 path = (String) ois.readObject();
@@ -38,8 +48,19 @@ public class ThreadServer extends Thread {
                         if (aux.isFile()) {
                             if (aux.canRead()) {
                                 try {
-                                    file = new SendFile(0, Utils.fileToByteArray(path));
-                                    byte[] hash = Utils.getHash("SHA-512", file.getContent());
+
+                                    Cipher c = Cipher.getInstance("AES/ECB/PKCS5Padding");
+                                    c.init(Cipher.ENCRYPT_MODE, keyObj.getClave());
+                                    array = Utils.getBytes(aux);
+                                    byte[] fichBytesCifrados = c.doFinal(array);
+
+                                    byte[] hashOriginal = Utils.getHash("SHA-512", array);
+
+
+                                    file = new SendFile(0, fichBytesCifrados, hashOriginal);
+                                    oos = new ObjectOutputStream(costumer.getOutputStream());
+                                    oos.writeObject(file);
+
                                 } catch (FileNotFoundException fnf) {
                                     file = new SendFile(4, null);
                                 }
@@ -56,25 +77,26 @@ public class ThreadServer extends Thread {
                     oos.writeObject(file);
                 }
             } while (!path.equalsIgnoreCase("exit"));
-            System.out.println("Cierre controlado del cliente");
+
         } catch (Exception e) {
+
             System.err.println("Cierre abrupto del cliente");
+            e.printStackTrace();
         } finally {
             if (oos != null) {
                 try {
                     oos.close();
                 } catch (IOException ex) {
-                    System.err.println("Error cerrando outputstream");
+                    System.err.println("Error cerrando ObjectOutputStream");
                 }
             }
             if (ois != null) {
                 try {
                     ois.close();
                 } catch (IOException ex) {
-                    System.err.println("Error cerrando outputstream");
+                    System.err.println("Error cerrando ObjectInputStream");
                 }
             }
         }
     }
-
 }
