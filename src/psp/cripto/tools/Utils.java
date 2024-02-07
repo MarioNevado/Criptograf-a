@@ -6,6 +6,12 @@ package psp.cripto.tools;
  */
 
 
+import psp.cripto.gui.GenerarClavePubPriv;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import java.io.*;
 import java.security.*;
 
@@ -71,11 +77,15 @@ public class Utils {
     public static void descifrarClavePublica(){
         
     }
-    public static void cifrarClavePrivada(){
-        
+    public static void cifrarClavePrivada(String[] args){
+
     }
+
     public static void descifrarClavePrivada(){
+
+
         
     }
+
     
 }
