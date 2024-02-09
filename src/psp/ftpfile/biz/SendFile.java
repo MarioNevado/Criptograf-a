@@ -32,7 +32,7 @@ public class SendFile implements Serializable{
     
     @Override
     public String toString() {
-        return "Fichero -> " + "código: " + code + "\t contenido: " + new String(content);
+        return "Fichero -> " + "código: " + code + ": " + resumen;
     }
 
     public String getResumen() {

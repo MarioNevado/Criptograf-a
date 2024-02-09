@@ -19,13 +19,14 @@ import psp.ftpfile.biz.SendFile;
  * @author dev
  */
 public class Utils {
+    
+    static final String CYPHEREDFILE_NAME = "Cifrado_file.txt", TRANSFORMATION ="AES/ECB/PKCS5Padding";
 
     public static byte[] fileToByteArray(String origin) throws Exception {
         File file = new File(origin);
         byte[] byteArray = new byte[(int) file.length()];
         try (FileInputStream fis = new FileInputStream(file)) {
             fis.read(byteArray);
-
         } catch (Exception e) {
             throw e;
         }
@@ -61,11 +62,12 @@ public class Utils {
             try {
                 if (fis != null) fis.close();
             } catch (IOException ex) {
-                System.err.println("ERROR al cerrar el inputstream: ");
+                System.err.println("ERROR al cerrar el inputstream");
             }
         }
         return null;
     }
+    
     public static String getHash(String algorythm, File file) {
         MessageDigest md;
         try {
@@ -73,7 +75,7 @@ public class Utils {
             md.update(getBytes(file));
             return hex(md.digest());
         } catch (NoSuchAlgorithmException ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         }
         return null;
     }
@@ -94,7 +96,7 @@ public class Utils {
         File ficheroCifrado;
         BufferedOutputStream fichSalida = null;
         try {
-            ficheroCifrado = new File("Cifrado_file.txt");
+            ficheroCifrado = new File(CYPHEREDFILE_NAME);
             fichSalida = new BufferedOutputStream(new FileOutputStream(ficheroCifrado));
             fichSalida.write(ficheroBytes);
             fichSalida.flush();
@@ -126,7 +128,7 @@ public class Utils {
     public static byte[] cifrarClaveSimetrica(byte[] data, SecretKey key) {
         Cipher c;
         try {
-            c = Cipher.getInstance("AES/ECB/PKCS5Padding");
+            c = Cipher.getInstance(TRANSFORMATION);
             c.init(Cipher.ENCRYPT_MODE, key);
             return c.doFinal(data);
         } catch (Exception e) {
@@ -137,7 +139,7 @@ public class Utils {
     public static byte[] descifrarClaveSimetrica(byte[] data, SecretKey key) {
         Cipher c;
         try {
-            c = Cipher.getInstance("AES/ECB/PKCS5Padding");
+            c = Cipher.getInstance(TRANSFORMATION);
             c.init(Cipher.DECRYPT_MODE, key);
             return c.doFinal(data);
         } catch (Exception ex) {

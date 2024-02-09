@@ -25,6 +25,7 @@ public class ThreadServer extends Thread {
     Socket costumer;
     String path;
     SecretKey key;
+    final String KEY_FILE = "miClave.key", ALGORYTHM = "SHA-512";
 
     public ThreadServer(Socket costumer, SecretKey key) {
         this.costumer = costumer;
@@ -37,13 +38,13 @@ public class ThreadServer extends Thread {
         ObjectInputStream ois = null;
         SendFile file;
         File aux;
-        GenerarClave keyObj= null;
+        GenerarClave keyObj;
         try {
             do {
                 ois = new ObjectInputStream(costumer.getInputStream());
                 path = (String) ois.readObject();
                 if (!path.equals("exit")) {
-                    ObjectInputStream claveStream = new ObjectInputStream(new FileInputStream("miClave.key"));
+                    ObjectInputStream claveStream = new ObjectInputStream(new FileInputStream(KEY_FILE));
                     keyObj = (GenerarClave) claveStream.readObject();
                     aux = new File(path);
                     if (aux.exists()) {
@@ -51,13 +52,13 @@ public class ThreadServer extends Thread {
                             if (aux.canRead()) {
                                 file = cifrar(keyObj, aux);
                             } else {
-                                file = new SendFile(3, null, ""); //TODO ESCRIBIR ERROR
+                                file = new SendFile(3, null, "No es legible"); //TODO ESCRIBIR ERROR
                             }
                         } else {
-                            file = new SendFile(2, null, "");
+                            file = new SendFile(2, null, "No es un fichero");
                         }
                     } else {
-                        file = new SendFile(1, null, "");
+                        file = new SendFile(1, null, "El fichero no existe");
                     }
                     oos = new ObjectOutputStream(costumer.getOutputStream());
                     oos.writeObject(file);
@@ -88,7 +89,7 @@ public class ThreadServer extends Thread {
     public SendFile cifrar(GenerarClave keyObj, File aux) { //TODO hacer enum con fallos
         try {
             byte[] content = Utils.fileToByteArray(path);
-            return new SendFile(0, Utils.cifrarClaveSimetrica(content, keyObj.getClave()),Utils.getHash("SHA-512", aux));
+            return new SendFile(0, Utils.cifrarClaveSimetrica(content, keyObj.getClave()),Utils.getHash(ALGORYTHM, aux));
         } catch (NoSuchAlgorithmException ex) {
             return new SendFile(4, null, "No existe el algoritmo");
         } catch (NoSuchPaddingException ex) {
