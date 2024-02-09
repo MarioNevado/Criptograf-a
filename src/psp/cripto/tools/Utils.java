@@ -14,6 +14,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.io.*;
 import java.security.*;
+import psp.ftpfile.biz.SendFile;
 
 /**
  *
@@ -63,6 +64,29 @@ public class Utils {
             hex += h;
         }
         return hex;
+    }
+    
+    public static void grabarFicheroCifrado(SendFile fichero, byte[] ficheroBytes) {
+        File ficheroCifrado;
+        BufferedOutputStream fichSalida = null;
+        try {
+            ficheroCifrado = new File("Cifrado_file.txt");
+            fichSalida = new BufferedOutputStream(new FileOutputStream(ficheroCifrado));
+            fichSalida.write(ficheroBytes);
+            fichSalida.flush();
+
+        } catch (FileNotFoundException ex) {
+            System.out.println("Fichero no encontrado");
+        } catch (IOException ex) {
+            System.out.println("Error I/O");
+
+        } finally {
+            try {
+                fichSalida.close();
+            } catch (IOException ex) {
+                System.out.println("Error I/O");
+            }
+        }
     }
     
     public static void cifrarClaveSimetrica(){

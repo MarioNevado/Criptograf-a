@@ -41,7 +41,6 @@ public class DescifrarFichero {
                 ficheroDescifrar = new File(args[0]);
                 clave = new ObjectInputStream(new FileInputStream(keyFichero));
                 keyObj = (GenerarClave) clave.readObject();
-
                 // Cifrando byte[] con Cipher.
                 Cipher c = Cipher.getInstance("AES/ECB/PKCS5Padding");
                 c.init(Cipher.DECRYPT_MODE, keyObj.getClave());

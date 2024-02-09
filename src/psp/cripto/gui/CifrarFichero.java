@@ -35,7 +35,7 @@ public class CifrarFichero {
         if (args.length > 0) {
             try {
                 ficheroCifrar = new File(args[0]);
-                clave = new ObjectInputStream(new FileInputStream(keyFichero)); //es nulo
+                clave = new ObjectInputStream(new FileInputStream(keyFichero)); 
                 keyObj = (GenerarClave) clave.readObject();
                 // Cifrando byte[] con Cipher.
                 Cipher c = Cipher.getInstance("AES/ECB/PKCS5Padding");

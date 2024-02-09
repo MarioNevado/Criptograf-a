@@ -7,6 +7,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
@@ -34,9 +36,7 @@ public class ThreadServer extends Thread {
         ObjectInputStream ois = null;
         SendFile file;
         File aux;
-        byte[] array;
         GenerarClave keyObj;
-
         try {
             do {
                 ois = new ObjectInputStream(costumer.getInputStream());
@@ -48,12 +48,7 @@ public class ThreadServer extends Thread {
                     if (aux.exists()) {
                         if (aux.isFile()) {
                             if (aux.canRead()) {
-                                Cipher c = Cipher.getInstance("AES/ECB/PKCS5Padding");
-                                c.init(Cipher.ENCRYPT_MODE, keyObj.getClave());
-                                array = Utils.fileToByteArray(aux.getAbsolutePath());
-                                byte[] fichBytesCifrados = c.doFinal(array);
-                                byte[] hashOriginal = Utils.getHash("SHA-512", array);
-                                file = new SendFile(0, fichBytesCifrados, hashOriginal);
+                                file = cifrar(keyObj, aux);
                             } else {
                                 file = new SendFile(3, null);
                             }
@@ -65,11 +60,10 @@ public class ThreadServer extends Thread {
                     }
                     oos = new ObjectOutputStream(costumer.getOutputStream());
                     oos.writeObject(file);
+                    Utils.grabarFicheroCifrado(file, file.getContent());
                 }
             } while (!path.equalsIgnoreCase("exit"));
-
         } catch (Exception e) {
-
             System.err.println("Cierre abrupto del cliente");
             e.printStackTrace();
         } finally {
@@ -87,6 +81,33 @@ public class ThreadServer extends Thread {
                     System.err.println("Error cerrando ObjectInputStream");
                 }
             }
+        }
+    }
+
+    public SendFile cifrar(GenerarClave keyObj, File aux) { //TODO hacer enum con fallos
+        byte[] array;
+        Cipher c;
+        try {
+            c = Cipher.getInstance("AES/ECB/PKCS5Padding");
+            c.init(Cipher.ENCRYPT_MODE, keyObj.getClave());
+            array = Utils.fileToByteArray(aux.getAbsolutePath());
+            byte[] fichBytesCifrados;
+            fichBytesCifrados = c.doFinal(array);
+            byte[] hashOriginal = Utils.getHash("SHA-512", array);
+            System.out.println("Cifrando fichero");
+            return new SendFile(0, fichBytesCifrados, hashOriginal);
+        } catch (NoSuchAlgorithmException ex) {
+            return new SendFile(4, null);
+        } catch (NoSuchPaddingException ex) {
+            return new SendFile(5, null);
+        } catch (InvalidKeyException ex) {
+            return new SendFile(6, null);
+        } catch (IllegalBlockSizeException ex) {
+            return new SendFile(7, null);
+        } catch (BadPaddingException ex) {
+            return new SendFile(8, null);
+        } catch (Exception ex) {
+            return new SendFile(9, null);
         }
     }
 }

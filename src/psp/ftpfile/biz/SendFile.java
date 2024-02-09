@@ -12,7 +12,6 @@ import java.io.Serializable;
  */
 public class SendFile implements Serializable{
     private int code;
-
     private byte[] fichBytesCifrados;
     private byte[] content;   
 
