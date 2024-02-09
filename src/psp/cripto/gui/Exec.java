@@ -34,7 +34,7 @@ public class Exec {
         ObjectInputStream ois = null;
         SendFile file;
         try (Socket costumer = new Socket("localhost", 6666)) {
-            GenerarClave keygen = (GenerarClave)(new ObjectInputStream(new FileInputStream(new File("miClave.key")))).readObject();
+            SecretKey key = Utils.getKey("miClave.key");
             do {
                 System.out.print("Introducir ruta absoluta del fichero (exit para salir): ");
                 path = sc.nextLine();
@@ -45,16 +45,11 @@ public class Exec {
                     ois = new ObjectInputStream(costumer.getInputStream());
                     file = (SendFile) ois.readObject();
                     if (file.getCode() == 0) {
-                        route = "/home/dev/NetBeansProjects/Criptografía/" + fileName;
-                        Cipher c = Cipher.getInstance("AES/ECB/PKCS5Padding");
-                        c.init(Cipher.DECRYPT_MODE, keygen.getClave());
-                        byte[] hash = Utils.getHash("SHA-512", file.getContent());
-                        //System.out.println(hash == file.getContent());
-                        
-                        byte[] descifrado = descifrar("/home/dev/NetBeansProjects/Criptografía/Cifrado_file.txt");
-                        grabarFicheroDescifrado(descifrado);
-                        if (Arrays.equals(hash, descifrado)) {
-                            Utils.byteArrayToFile(route, file.getContent());
+                        route = "/home/dev/NetBeansProjects/Criptografía/Descifrado_" + fileName;
+                        byte[] descifrado = Utils.descifrarClaveSimetrica(file.getContent(), key);
+                        String hash = Utils.getHash("SHA-512", new File(path));
+                        if (hash.equals(file.getResumen())) {
+                            Utils.byteArrayToFile(route, descifrado);
                             System.out.println("Descargado correctamente");
                         }else System.out.println("No se ha descargado");
                     } else {
@@ -119,6 +114,7 @@ public class Exec {
                 Cipher c = Cipher.getInstance("AES/ECB/PKCS5Padding");
                 c.init(Cipher.DECRYPT_MODE, keyObj.getClave());
                 fichBytes = ficheroBytes(ficheroDescifrar);
+                System.out.println("hoa");
                 System.out.println(c.doFinal(fichBytes) == null);
                 return c.doFinal(fichBytes);
 //                grabarFicheroDescifrado(ficheroDescifrar, fichBytesCifrados);

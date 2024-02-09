@@ -12,19 +12,15 @@ import java.io.Serializable;
  */
 public class SendFile implements Serializable{
     private int code;
-    private byte[] fichBytesCifrados;
+    private String resumen;
     private byte[] content;   
 
-    public SendFile(int code, byte[] content) {
+    public SendFile(int code, byte[] content, String resumen) {
         this.code = code;
         this.content = content;
+        this.resumen = resumen;
     }
 
-    public SendFile(int code, byte[] fichBytesCifrados, byte[] content) {
-        this.code = code;
-        this.fichBytesCifrados = fichBytesCifrados;
-        this.content = content;
-    }
 
     public int getCode() {
         return code;
@@ -37,6 +33,14 @@ public class SendFile implements Serializable{
     @Override
     public String toString() {
         return "Fichero -> " + "código: " + code + "\t contenido: " + new String(content);
+    }
+
+    public String getResumen() {
+        return resumen;
+    }
+
+    public void setResumen(String resumen) {
+        this.resumen = resumen;
     }
     
 }

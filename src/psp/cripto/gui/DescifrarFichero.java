@@ -64,15 +64,12 @@ public class DescifrarFichero {
             } catch (NoSuchPaddingException ex) {
                 System.out.println(ex.getMessage());
             } catch (java.lang.IllegalArgumentException ex) {
-
             }
 
         } else {
             System.out.println("No se ha especificado archivo a descifrar.");
         }
-
     }
-
     public static byte[] ficheroBytes(File ficheroCifrar) {
         byte[] fichBytes = null;
         try {

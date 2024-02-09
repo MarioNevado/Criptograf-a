@@ -4,16 +4,14 @@ package psp.cripto.tools;
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-
-
-import psp.cripto.gui.GenerarClavePubPriv;
-
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.io.*;
 import java.security.*;
+import javax.crypto.SecretKey;
+import psp.cripto.gui.GenerarClave;
 import psp.ftpfile.biz.SendFile;
 
 /**
@@ -43,21 +41,47 @@ public class Utils {
         }
     }
 
-    public static byte[] getHash(String algorythm, byte[] content) {
+    public static byte[] getBytes(File file) {
+        byte[] buffer;
+        long bytes;
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream(file);
+            bytes = file.length();
+            buffer = new byte[(int) bytes];
+            int pointer, counter = 0;
+            while ((pointer = fis.read()) != -1) {
+                buffer[counter] = (byte) pointer;
+                counter++;
+            }
+            return buffer;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            try {
+                if (fis != null) fis.close();
+            } catch (IOException ex) {
+                System.err.println("ERROR al cerrar el inputstream: ");
+            }
+        }
+        return null;
+    }
+    public static String getHash(String algorythm, File file) {
         MessageDigest md;
         try {
             md = MessageDigest.getInstance(algorythm);
-            md.update(content);
-            return md.digest();
+            md.update(getBytes(file));
+            return hex(md.digest());
         } catch (NoSuchAlgorithmException ex) {
             System.out.println(ex.getMessage());
         }
         return null;
     }
+
     public static String hex(byte[] resumen) {
-        String hex = "";
+        String hex = "", h;
         for (int i = 0; i < resumen.length; i++) {
-            String h = Integer.toHexString(resumen[i] & 0xFF) + ":";
+            h = Integer.toHexString(resumen[i] & 0xFF) + ":";
             if (h.length() == 1) {
                 hex += "0";
             }
@@ -65,7 +89,7 @@ public class Utils {
         }
         return hex;
     }
-    
+
     public static void grabarFicheroCifrado(SendFile fichero, byte[] ficheroBytes) {
         File ficheroCifrado;
         BufferedOutputStream fichSalida = null;
@@ -88,28 +112,52 @@ public class Utils {
             }
         }
     }
-    
-    public static void cifrarClaveSimetrica(){
-        
+
+    public static SecretKey getKey(String route) {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(route))) {
+            GenerarClave keygen = (GenerarClave) ois.readObject();
+            return keygen.getClave();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
-    public static void descifrarClaveSimetrica(){
-        
+
+    public static byte[] cifrarClaveSimetrica(byte[] data, SecretKey key) {
+        Cipher c;
+        try {
+            c = Cipher.getInstance("AES/ECB/PKCS5Padding");
+            c.init(Cipher.ENCRYPT_MODE, key);
+            return c.doFinal(data);
+        } catch (Exception e) {
+            return null;
+        }
     }
-    public static void cifrarClavePublica(){
-        
+
+    public static byte[] descifrarClaveSimetrica(byte[] data, SecretKey key) {
+        Cipher c;
+        try {
+            c = Cipher.getInstance("AES/ECB/PKCS5Padding");
+            c.init(Cipher.DECRYPT_MODE, key);
+            return c.doFinal(data);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } 
+        return null;
     }
-    public static void descifrarClavePublica(){
-        
-    }
-    public static void cifrarClavePrivada(String[] args){
+
+    public static void cifrarClavePublica() {
 
     }
 
-    public static void descifrarClavePrivada(){
+    public static void descifrarClavePublica() {
 
-
-        
     }
 
-    
+    public static void cifrarClavePrivada(String[] args) {
+    }
+
+    public static void descifrarClavePrivada() {
+    }
+
 }

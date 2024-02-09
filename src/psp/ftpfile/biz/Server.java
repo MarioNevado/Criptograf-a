@@ -4,8 +4,11 @@
  */
 package psp.ftpfile.biz;
 
+import java.io.File;
 import java.net.*;
+import javax.crypto.SecretKey;
 import psp.cripto.gui.GenerarClave;
+import psp.cripto.tools.Utils;
 
 /**
  *
@@ -16,12 +19,12 @@ public class Server {
     public static void main(String[] args) {
         Socket costumer;
         ThreadServer th;
-        
+        String route = "miClave.key";
         try (ServerSocket ss = new ServerSocket(6666)) {
-            GenerarClave keygen = new GenerarClave();
+            SecretKey key = Utils.getKey(route);
             while (true){
                 costumer = ss.accept();
-                th = new ThreadServer(costumer, keygen);
+                th = new ThreadServer(costumer, key);
                 th.start();
             } 
         } catch (Exception e) {

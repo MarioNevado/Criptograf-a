@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 import psp.cripto.gui.GenerarClave;
 import psp.cripto.tools.Utils;
 
@@ -23,11 +24,11 @@ public class ThreadServer extends Thread {
 
     Socket costumer;
     String path;
-    GenerarClave keygen;
+    SecretKey key;
 
-    public ThreadServer(Socket costumer, GenerarClave keygen) {
+    public ThreadServer(Socket costumer, SecretKey key) {
         this.costumer = costumer;
-        this.keygen = keygen;
+        this.key = key;
     }
 
     @Override
@@ -36,7 +37,7 @@ public class ThreadServer extends Thread {
         ObjectInputStream ois = null;
         SendFile file;
         File aux;
-        GenerarClave keyObj;
+        GenerarClave keyObj= null;
         try {
             do {
                 ois = new ObjectInputStream(costumer.getInputStream());
@@ -50,13 +51,13 @@ public class ThreadServer extends Thread {
                             if (aux.canRead()) {
                                 file = cifrar(keyObj, aux);
                             } else {
-                                file = new SendFile(3, null);
+                                file = new SendFile(3, null, ""); //TODO ESCRIBIR ERROR
                             }
                         } else {
-                            file = new SendFile(2, null);
+                            file = new SendFile(2, null, "");
                         }
                     } else {
-                        file = new SendFile(1, null);
+                        file = new SendFile(1, null, "");
                     }
                     oos = new ObjectOutputStream(costumer.getOutputStream());
                     oos.writeObject(file);
@@ -85,29 +86,21 @@ public class ThreadServer extends Thread {
     }
 
     public SendFile cifrar(GenerarClave keyObj, File aux) { //TODO hacer enum con fallos
-        byte[] array;
-        Cipher c;
         try {
-            c = Cipher.getInstance("AES/ECB/PKCS5Padding");
-            c.init(Cipher.ENCRYPT_MODE, keyObj.getClave());
-            array = Utils.fileToByteArray(aux.getAbsolutePath());
-            byte[] fichBytesCifrados;
-            fichBytesCifrados = c.doFinal(array);
-            byte[] hashOriginal = Utils.getHash("SHA-512", array);
-            System.out.println("Cifrando fichero");
-            return new SendFile(0, fichBytesCifrados, hashOriginal);
+            byte[] content = Utils.fileToByteArray(path);
+            return new SendFile(0, Utils.cifrarClaveSimetrica(content, keyObj.getClave()),Utils.getHash("SHA-512", aux));
         } catch (NoSuchAlgorithmException ex) {
-            return new SendFile(4, null);
+            return new SendFile(4, null, "No existe el algoritmo");
         } catch (NoSuchPaddingException ex) {
-            return new SendFile(5, null);
+            return new SendFile(5, null, "Padding Inexistente");
         } catch (InvalidKeyException ex) {
-            return new SendFile(6, null);
+            return new SendFile(6, null, "Clave Inválida");
         } catch (IllegalBlockSizeException ex) {
-            return new SendFile(7, null);
+            return new SendFile(7, null, "Bloque Ilegal");
         } catch (BadPaddingException ex) {
-            return new SendFile(8, null);
+            return new SendFile(8, null, "Padding Erroneo");
         } catch (Exception ex) {
-            return new SendFile(9, null);
+            return new SendFile(9, null, ex.getMessage());
         }
     }
 }

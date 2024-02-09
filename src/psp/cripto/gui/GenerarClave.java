@@ -40,7 +40,6 @@ public class GenerarClave implements Serializable {
     }
 
     public static void main(String[] args) throws Exception {
-        System.out.println("1");
         ObjectOutputStream claveObj = null;
         File fichero;
         GenerarClave key;
