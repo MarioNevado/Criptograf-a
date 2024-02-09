@@ -22,12 +22,14 @@ public class Exec {
     
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        String path, fileName, route;
+        String path, fileName, route, hash;
+        SecretKey key;
         ObjectOutputStream oos = null;
         ObjectInputStream ois = null;
         SendFile file;
+        byte[] descifrado;
         try (Socket costumer = new Socket(HOST, PORT)) {
-            SecretKey key = Utils.getKey(KEYFILE);
+            key = Utils.getKey(KEYFILE);
             do {
                 System.out.print("Introducir ruta absoluta del fichero (exit para salir): ");
                 path = sc.nextLine();
@@ -39,8 +41,8 @@ public class Exec {
                     file = (SendFile) ois.readObject();
                     if (file.getCode() == 0) {
                         route = DOWNLOAD_ROUTE + fileName;
-                        byte[] descifrado = Utils.descifrarClaveSimetrica(file.getContent(), key);
-                        String hash = Utils.getHash(ALGORYTHM, new File(path));
+                        descifrado = Utils.descifrarClaveSimetrica(file.getContent(), key);
+                        hash = Utils.getHash(ALGORYTHM, new File(path));
                         if (hash.equals(file.getResumen())) {
                             Utils.byteArrayToFile(route, descifrado);
                             System.out.println("Descargado correctamente");

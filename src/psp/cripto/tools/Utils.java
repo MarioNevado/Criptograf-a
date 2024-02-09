@@ -37,6 +37,7 @@ public class Utils {
         File fichero = new File(goal);
         try (FileOutputStream fos = new FileOutputStream(fichero)) {
             fos.write(byteArray);
+            fos.flush();
         } catch (Exception e) {
             throw e;
         }
@@ -109,6 +110,27 @@ public class Utils {
         } finally {
             try {
                 fichSalida.close();
+            } catch (IOException ex) {
+                System.out.println("Error I/O");
+            }
+        }
+    }
+    
+    public static void grabarFicheroDescifrado(File fichero, byte[] ficheroBytes) {
+        File ficheroCifrado;
+        BufferedOutputStream bos = null;
+        try {
+            ficheroCifrado = new File("DesCifrado_" + fichero.getName());
+            bos = new BufferedOutputStream(new FileOutputStream(ficheroCifrado));
+            bos.write(ficheroBytes);
+            bos.flush();
+        } catch (FileNotFoundException ex) {
+            System.out.println("Fichero no encontrado");
+        } catch (IOException ex) {
+            System.out.println("Error I/O");
+        } finally {
+            try {
+                bos.close();
             } catch (IOException ex) {
                 System.out.println("Error I/O");
             }

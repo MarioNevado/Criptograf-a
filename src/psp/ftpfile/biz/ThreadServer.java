@@ -86,9 +86,10 @@ public class ThreadServer extends Thread {
         }
     }
 
-    public SendFile cifrar(GenerarClave keyObj, File aux) { //TODO hacer enum con fallos
+    public SendFile cifrar(GenerarClave keyObj, File aux) { 
+        byte[] content;
         try {
-            byte[] content = Utils.fileToByteArray(path);
+             content = Utils.fileToByteArray(path);
             return new SendFile(0, Utils.cifrarClaveSimetrica(content, keyObj.getClave()),Utils.getHash(ALGORYTHM, aux));
         } catch (NoSuchAlgorithmException ex) {
             return new SendFile(4, null, "No existe el algoritmo");
